@@ -8,10 +8,8 @@
   :root {
     --yaw: 0deg;
     --pitch: 0deg;
-    --ink: #26313b;
-    --muted: #71808b;
-    --wood: #765442;
-    --brass: #c89542;
+    --room-color: #f8f7f2;
+    --room-depth: 620px;
   }
 
   * { box-sizing: border-box; }
@@ -19,9 +17,7 @@
   body {
     margin: 0;
     overflow: hidden;
-    color: var(--ink);
-    background: #dce5e8;
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--room-color);
   }
 
   .viewport {
@@ -45,85 +41,77 @@
   }
   .room.is-dragging { transition: none; }
 
-  .wall, .floor, .ceiling {
+  .wall, .side-wall, .floor, .ceiling {
     position: absolute;
-    backface-visibility: hidden;
+    backface-visibility: visible;
   }
   .wall {
     inset: 0;
-    background:
-      linear-gradient(90deg, rgba(89,111,120,.12) 1px, transparent 1px) 0 0 / 150px 150px,
-      linear-gradient(rgba(89,111,120,.08) 1px, transparent 1px) 0 0 / 150px 150px,
-      #f8faf8;
-    box-shadow: inset 0 0 180px rgba(104,126,133,.25);
-    transform: translateZ(-430px);
+    background: var(--room-color);
+    box-shadow: inset 0 0 180px rgba(110,110,110,.2), inset 0 -3px 0 rgba(92,88,80,.2);
+    transform: translateZ(calc(var(--room-depth) * -1));
   }
-  .wall::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg, rgba(255,255,255,.55), transparent 42%, rgba(115,132,137,.12));
+  .side-wall {
+    top: 0;
+    width: var(--room-depth);
+    height: 100%;
+    background: var(--room-color);
+    box-shadow: inset 0 0 130px rgba(110,110,110,.2), inset 0 -3px 0 rgba(92,88,80,.2);
+  }
+  .side-wall.left {
+    left: 0;
+    transform-origin: left center;
+    transform: translateZ(calc(var(--room-depth) * -1)) rotateY(-90deg);
+  }
+  .side-wall.right {
+    left: calc(100% - var(--room-depth));
+    transform-origin: right center;
+    transform: translateZ(calc(var(--room-depth) * -1)) rotateY(90deg);
   }
   .floor {
-    inset: 0;
-    background:
-      linear-gradient(90deg, rgba(93,71,55,.12) 2px, transparent 2px) 0 0 / 130px 100%,
-      repeating-linear-gradient(0deg, #d6c6b5 0 4px, #c8b6a4 5px 7px);
-    transform: rotateX(90deg) translateZ(-430px);
-    transform-origin: center bottom;
-    box-shadow: inset 0 80px 110px rgba(78,61,49,.24);
+    top: 100%;
+    left: calc(50% - var(--room-depth));
+    width: calc(var(--room-depth) * 2);
+    height: 1100px;
+    background: linear-gradient(180deg, #e7e5df 0%, var(--room-color) 16%, var(--room-color) 100%);
+    transform: translateZ(calc(var(--room-depth) * -1)) rotateX(90deg);
+    transform-origin: center top;
+    box-shadow: inset 0 80px 110px rgba(110,110,110,.22), inset 0 3px 0 rgba(92,88,80,.2);
   }
   .ceiling {
-    inset: 0;
-    background: #eef3f1;
-    transform: rotateX(-90deg) translateZ(-430px);
-    transform-origin: center top;
+    top: auto;
+    bottom: 100%;
+    left: calc(50% - var(--room-depth));
+    width: calc(var(--room-depth) * 2);
+    height: 1100px;
+    background: linear-gradient(180deg, var(--room-color) 0%, #e8e6e0 100%);
+    transform: translateZ(calc(var(--room-depth) * -1)) rotateX(-90deg);
+    transform-origin: center bottom;
+    box-shadow: inset 0 -80px 110px rgba(110,110,110,.16), inset 0 -3px 0 rgba(92,88,80,.16);
   }
-
-  .window {
-    position: absolute;
-    width: 290px;
-    height: 210px;
-    left: 10%;
-    top: 22%;
-    border: 14px solid #fff;
-    background:
-      linear-gradient(145deg, rgba(255,255,255,.75), transparent 55%),
-      linear-gradient(#9fc8d7, #e1f1ef 65%, #a8c3ad);
-    box-shadow: 0 8px 24px rgba(53,70,78,.2), inset 0 0 0 7px #b9c9c9;
-    transform: translateZ(-421px);
-  }
-  .window::before, .window::after {
-    content: "";
-    position: absolute;
-    background: #fff;
-    box-shadow: 0 0 0 1px rgba(90,110,117,.12);
-  }
-  .window::before { width: 8px; inset: 0 50%; }
-  .window::after { height: 8px; inset: 50% 0; }
 
   .clock-shadow {
     position: absolute;
-    width: min(390px, 42vw);
+    width: min(150px, 17vw);
     aspect-ratio: 1;
     left: 50%;
-    top: 41%;
+    top: 38%;
     border-radius: 50%;
-    background: rgba(43,54,57,.2);
+    background: rgba(0,0,0,.24);
     filter: blur(25px);
-    transform: translate(-50%, -50%) translate3d(20px, 24px, -412px);
+    transform: translate(-50%, -50%) translate3d(5px, 6px, -617px);
   }
   .clock {
     position: absolute;
-    width: min(390px, 42vw);
+    width: min(150px, 17vw);
     aspect-ratio: 1;
     left: 50%;
-    top: 41%;
+    top: 38%;
     border-radius: 50%;
-    padding: 18px;
-    background: linear-gradient(145deg, #9d7255, var(--wood) 55%, #4f352a);
-    box-shadow: 0 14px 0 #4d352b, 0 20px 34px rgba(36,43,43,.32), inset 2px 2px 8px rgba(255,255,255,.2);
-    transform: translate(-50%, -50%) translateZ(-410px);
+    padding: 3px;
+    background: linear-gradient(145deg, #363636, #111 55%, #050505);
+    box-shadow: 0 2px 0 #050505, 0 7px 16px rgba(0,0,0,.28), inset 2px 2px 8px rgba(255,255,255,.14);
+    transform: translate(-50%, -50%) translateZ(-619px) rotateX(0deg) rotateY(0deg);
   }
   .face {
     position: relative;
@@ -131,53 +119,66 @@
     height: 100%;
     border-radius: 50%;
     background: radial-gradient(circle at 38% 30%, #fffefa, #f1eee5 68%, #d7d2c7);
-    border: 5px solid var(--brass);
-    box-shadow: inset 0 0 0 5px #f7f5ed, inset 0 0 20px rgba(43,47,45,.18);
+    border: 3px solid #171717;
+    box-shadow: inset 0 0 0 5px #f7f5ed, inset 0 0 20px rgba(0,0,0,.24);
   }
   .tick {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 3px;
-    height: 46%;
+    width: 2px;
+    height: 50%;
     background: transparent;
-    transform: translate(-50%, -50%) rotate(var(--angle));
+    transform: translate(-50%, -100%) rotate(var(--angle));
+    transform-origin: 50% 100%;
   }
   .tick::before {
     content: "";
     display: block;
     width: 100%;
-    height: 13px;
+    height: 7px;
     border-radius: 2px;
-    background: #3e4a4b;
+    background: #111;
   }
-  .tick.major { width: 5px; }
-  .tick.major::before { height: 20px; background: #29373a; }
+  .tick.major { width: 3px; }
+  .tick.major::before { height: 13px; background: #000; }
   .number {
     position: absolute;
     font-family: Georgia, serif;
-    font-size: clamp(1.05rem, 2.5vw, 1.65rem);
+    width: 1.5em;
+    font-size: clamp(.4rem, 1.5vw, .8rem);
     font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
     transform: translate(-50%, -50%);
   }
-  .n12 { left: 50%; top: 10%; }
-  .n3 { left: 90%; top: 50%; }
-  .n6 { left: 50%; top: 90%; }
-  .n9 { left: 10%; top: 50%; }
+  .n12 { left: 50%; top: 17%; }
+  .n1 { left: 65%; top: 21%; }
+  .n2 { left: 77%; top: 33%; }
+  .n3 { left: 83%; top: 50%; }
+  .n4 { left: 77%; top: 67%; }
+  .n5 { left: 65%; top: 79%; }
+  .n6 { left: 50%; top: 83%; }
+  .n7 { left: 35%; top: 79%; }
+  .n8 { left: 23%; top: 67%; }
+  .n9 { left: 17%; top: 50%; }
+  .n10 { left: 23%; top: 33%; }
+  .n11 { left: 35%; top: 21%; }
   .hand {
     position: absolute;
     left: 50%;
     bottom: 50%;
-    width: 7px;
+    width: 4px;
     height: 31%;
     border-radius: 8px;
-    background: #29373a;
+    background: #111;
     transform-origin: 50% 100%;
     transform: translateX(-50%) rotate(var(--rotation));
     box-shadow: 1px 1px 3px rgba(30,35,35,.25);
   }
-  .hand.hour { width: 10px; height: 23%; }
-  .hand.second { width: 2px; height: 37%; background: #bd4d3e; }
+  .hand.hour { width: 6px; height: 23%; }
+  .hand.second { width: 2px; height: 37%;   background: #333; }
   .hub {
     position: absolute;
     left: 50%;
@@ -185,55 +186,14 @@
     width: 17px;
     height: 17px;
     border-radius: 50%;
-    background: var(--brass);
-    border: 3px solid #67502f;
+    background: #111;
+    border: 3px solid #000;
     transform: translate(-50%, -50%);
   }
 
-  .overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: clamp(20px, 4vw, 48px);
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(255,255,255,.28), transparent 28%, transparent 72%, rgba(54,63,66,.12));
-  }
-  .title, .readout {
-    width: fit-content;
-    padding: 12px 16px;
-    border: 1px solid rgba(255,255,255,.7);
-    border-radius: 14px;
-    background: rgba(255,255,255,.48);
-    box-shadow: 0 8px 24px rgba(53,70,78,.1);
-    backdrop-filter: blur(8px);
-  }
-  .title { font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; }
-  .readout { align-self: flex-end; text-align: right; }
-  .time {
-    font-size: clamp(1.5rem, 4vw, 2.7rem);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: .04em;
-  }
-  .date { margin-top: 2px; color: var(--muted); font-size: .78rem; }
-  .hint {
-    position: absolute;
-    left: 50%;
-    bottom: 24px;
-    margin: 0;
-    color: rgba(38,49,59,.65);
-    font-size: .75rem;
-    letter-spacing: .08em;
-    text-align: center;
-    text-transform: uppercase;
-    transform: translateX(-50%);
-  }
   @media (max-width: 600px) {
-    .window { width: 190px; height: 150px; left: -2%; }
-    .clock, .clock-shadow { width: min(300px, 66vw); }
-    .clock { padding: 13px; }
-    .hint { bottom: 16px; width: 100%; }
+    .clock, .clock-shadow { width: min(120px, 28vw); }
+    .clock { padding: 3px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .room { transition: none; }
@@ -246,24 +206,18 @@
     <div class="wall"></div>
     <div class="ceiling"></div>
     <div class="floor"></div>
-    <div class="window" aria-hidden="true"></div>
+    <div class="side-wall left"></div>
+    <div class="side-wall right"></div>
     <div class="clock-shadow" aria-hidden="true"></div>
     <section class="clock" aria-label="Analog local time clock">
       <div class="face">
-        <span class="tick major" style="--angle: 0deg"></span>
-        <span class="tick" style="--angle: 30deg"></span>
-        <span class="tick" style="--angle: 60deg"></span>
-        <span class="tick major" style="--angle: 90deg"></span>
-        <span class="tick" style="--angle: 120deg"></span>
-        <span class="tick" style="--angle: 150deg"></span>
-        <span class="tick major" style="--angle: 180deg"></span>
-        <span class="tick" style="--angle: 210deg"></span>
-        <span class="tick" style="--angle: 240deg"></span>
-        <span class="tick major" style="--angle: 270deg"></span>
-        <span class="tick" style="--angle: 300deg"></span>
-        <span class="tick" style="--angle: 330deg"></span>
-        <span class="number n12">12</span><span class="number n3">3</span>
-        <span class="number n6">6</span><span class="number n9">9</span>
+        <div class="ticks" id="ticks" aria-hidden="true"></div>
+        <span class="number n12">12</span><span class="number n1">1</span>
+        <span class="number n2">2</span><span class="number n3">3</span>
+        <span class="number n4">4</span><span class="number n5">5</span>
+        <span class="number n6">6</span><span class="number n7">7</span>
+        <span class="number n8">8</span><span class="number n9">9</span>
+        <span class="number n10">10</span><span class="number n11">11</span>
         <span class="hand hour" id="hourHand"></span>
         <span class="hand minute" id="minuteHand"></span>
         <span class="hand second" id="secondHand"></span>
@@ -271,14 +225,6 @@
       </div>
     </section>
   </div>
-  <div class="overlay">
-    <div class="title">Local time · wall clock</div>
-    <div class="readout" aria-live="polite">
-      <div class="time" id="digitalTime"></div>
-      <div class="date" id="date"></div>
-    </div>
-  </div>
-  <p class="hint">Drag to look around · release to recenter</p>
 </main>
 <script>
   const viewport = document.getElementById("viewport");
@@ -286,13 +232,19 @@
   const hourHand = document.getElementById("hourHand");
   const minuteHand = document.getElementById("minuteHand");
   const secondHand = document.getElementById("secondHand");
-  const digitalTime = document.getElementById("digitalTime");
-  const date = document.getElementById("date");
+  const ticks = document.getElementById("ticks");
   let pointerId = null;
   let startX = 0;
   let startY = 0;
   let yaw = 0;
   let pitch = 0;
+
+  for (let index = 0; index < 60; index += 1) {
+    const tick = document.createElement("span");
+    tick.className = index % 5 === 0 ? "tick major" : "tick";
+    tick.style.setProperty("--angle", `${index * 6}deg`);
+    ticks.append(tick);
+  }
 
   function updateClock() {
     const now = new Date();
@@ -302,13 +254,11 @@
     hourHand.style.setProperty("--rotation", `${hours * 30}deg`);
     minuteHand.style.setProperty("--rotation", `${minutes * 6}deg`);
     secondHand.style.setProperty("--rotation", `${seconds * 6}deg`);
-    digitalTime.textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
-    date.textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
   }
 
   function setView(nextYaw, nextPitch) {
-    yaw = Math.max(-28, Math.min(28, nextYaw));
-    pitch = Math.max(-18, Math.min(18, nextPitch));
+    yaw = Math.max(-20, Math.min(20, nextYaw));
+    pitch = Math.max(-12, Math.min(12, nextPitch));
     room.style.setProperty("--yaw", `${yaw}deg`);
     room.style.setProperty("--pitch", `${pitch}deg`);
   }
