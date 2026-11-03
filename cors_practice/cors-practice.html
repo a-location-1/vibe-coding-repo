@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CORS Practice</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --panel: #fff; --ink: #17212b; --muted: #64707d;
+    --line: #d7dee6; --blue: #1769aa; --blue-soft: #e8f2fb;
+    --green: #18794e; --green-soft: #e8f6ef; --red: #b42318; --red-soft: #fff0ee;
+    --shadow: 0 10px 28px rgba(28, 49, 69, .08);
+  }
+  [data-theme="dark"] {
+    --bg: #151a20; --panel: #202832; --ink: #eef4f8; --muted: #aab6c1;
+    --line: #3a4652; --blue: #75baf0; --blue-soft: #243f55;
+    --green: #76d2a4; --green-soft: #183c2d; --red: #ff9f95; --red-soft: #4a2725;
+    --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+  button, select { font: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, select:focus-visible, .drop-zone:focus-visible { outline: 3px solid #e6a23c; outline-offset: 3px; }
+  .theme-toggle { position: absolute; right: 20px; top: 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--ink); padding: 7px 12px; }
+  main { width: min(100% - 32px, 980px); margin: 0 auto; padding: 54px 0 70px; }
+  header { max-width: 700px; margin-bottom: 30px; }
+  .eyebrow { color: var(--blue); font-size: .78rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+  h1 { margin: 4px 0 8px; font-size: clamp(2.2rem, 7vw, 4.5rem); letter-spacing: -.06em; line-height: 1; }
+  header p { color: var(--muted); font-size: 1.08rem; margin: 0; }
+  .layout { display: grid; grid-template-columns: 220px 1fr; gap: 30px; align-items: start; }
+  .progress { position: sticky; top: 20px; }
+  .progress h2 { font-size: .85rem; margin: 0 0 12px; }
+  .steps { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+  .steps button { width: 100%; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted); padding: 9px 10px; text-align: left; }
+  .steps button:hover { border-color: var(--line); color: var(--ink); }
+  .steps button[aria-current="step"] { border-color: var(--blue); background: var(--blue-soft); color: var(--ink); font-weight: 700; }
+  .step-number { display: inline-grid; place-items: center; width: 23px; height: 23px; margin-right: 7px; border: 1px solid currentColor; border-radius: 50%; font-size: .76rem; }
+  .card { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: var(--shadow); padding: clamp(20px, 4vw, 36px); }
+  .scenario-label { color: var(--muted); font-size: .85rem; font-weight: 700; }
+  h2 { margin: 4px 0 8px; font-size: clamp(1.5rem, 4vw, 2.2rem); letter-spacing: -.035em; }
+  .scenario-intro { color: var(--muted); margin: 0 0 24px; }
+  .diagram { display: flex; align-items: center; gap: 10px; overflow-x: auto; margin: 0 0 26px; padding: 4px 0 10px; }
+  .node { min-width: 130px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 12px; text-align: center; }
+  .node strong { display: block; font-size: .9rem; }
+  .node small { display: block; color: var(--muted); font-size: .75rem; }
+  .arrow { color: var(--blue); font-size: 1.4rem; font-weight: 700; }
+  .question { border-top: 1px solid var(--line); padding-top: 22px; }
+  .question h3 { margin: 0 0 5px; font-size: 1.05rem; }
+  .hint { margin: 0 0 15px; color: var(--muted); font-size: .9rem; }
+  .choices { display: grid; gap: 10px; }
+  .choice { border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--ink); padding: 13px 15px; text-align: left; transition: border-color .15s, background .15s; }
+  .choice:hover { border-color: var(--blue); background: var(--blue-soft); }
+  .choice.selected { border-color: var(--blue); background: var(--blue-soft); box-shadow: inset 3px 0 var(--blue); }
+  .choice.correct { border-color: var(--green); background: var(--green-soft); }
+  .choice.incorrect { border-color: var(--red); background: var(--red-soft); }
+  .choice code { font-size: .9em; }
+  .check-row { display: flex; justify-content: flex-end; margin-top: 18px; }
+  .primary { border: 0; border-radius: 8px; background: var(--blue); color: #fff; font-weight: 700; padding: 11px 17px; }
+  .primary:hover { filter: brightness(.9); }
+  .primary:disabled { cursor: not-allowed; opacity: .5; }
+  .feedback { margin-top: 18px; border-radius: 9px; padding: 14px 16px; }
+  .feedback.good { background: var(--green-soft); color: var(--green); }
+  .feedback.try { background: var(--red-soft); color: var(--red); }
+  .feedback strong { display: block; margin-bottom: 3px; }
+  .feedback p { margin: 0; color: var(--ink); }
+  .order-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .order-item { display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); padding: 9px; }
+  .order-item.dragging { opacity: .45; }
+  .drag-handle { cursor: grab; color: var(--muted); font-size: 1.2rem; padding: 0 4px; }
+  .order-text { flex: 1; }
+  .move { border: 1px solid var(--line); border-radius: 5px; background: var(--panel); color: var(--muted); padding: 2px 7px; }
+  .move:hover { color: var(--ink); border-color: var(--blue); }
+  .complete { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 18px; color: var(--green); font-weight: 700; }
+  .finish { text-align: center; }
+  .finish .mark { color: var(--green); font-size: 3rem; }
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .progress { position: static; }
+    .steps { display: flex; overflow-x: auto; padding-bottom: 5px; }
+    .steps li { min-width: max-content; }
+    .steps button { padding: 7px 8px; }
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle" type="button">Dark mode</button>
+<main>
+  <header>
+    <div class="eyebrow">Interactive practice</div>
+    <h1>CORS, one request at a time.</h1>
+    <p>Work through progressively trickier scenarios. Learn to spot origins, preflights, response headers, and credentials without memorizing a checklist.</p>
+  </header>
+  <div class="layout">
+    <nav class="progress" aria-label="Scenario progress">
+      <h2>Six scenarios</h2>
+      <ol class="steps" id="steps"></ol>
+    </nav>
+    <section class="card" id="app" aria-live="polite"></section>
+  </div>
+</main>
+<script>
+const scenarios = [
+  {
+    title: "Meet the origin",
+    intro: "A page at one origin wants to fetch JSON from another. The server can opt in by naming the requesting origin.",
+    nodes: [["Website A", "https://a.example"], ["API B", "https://b.example"]],
+    question: "The browser sends the request, but which response lets JavaScript read it?",
+    hint: "The browser checks the response before exposing it to the page.",
+    choices: [
+      { text: "The response includes <code>Access-Control-Allow-Origin: https://a.example</code>.", correct: true },
+      { text: "The request includes <code>Access-Control-Allow-Origin</code>.", correct: false },
+      { text: "The two sites use the same domain suffix.", correct: false }
+    ],
+    explanation: "CORS is a browser-enforced permission system. API B must include Access-Control-Allow-Origin naming A (or a suitable wildcard) in its response."
+  },
+  {
+    title: "A blog and an image",
+    intro: "A blog at blog.example displays an image hosted on images.example. Not every cross-origin use has the same rules.",
+    nodes: [["Blog page", "blog.example"], ["<img>", "images.example"]],
+    question: "Which statement is most accurate?",
+    hint: "Displaying a resource and reading its bytes are different capabilities.",
+    choices: [
+      { text: "An image can usually be displayed cross-origin, but script cannot freely read its pixels.", correct: true },
+      { text: "Every cross-origin image request requires an OPTIONS preflight.", correct: false },
+      { text: "CORS blocks the browser from displaying every cross-origin image.", correct: false }
+    ],
+    explanation: "Some HTML elements can request cross-origin resources. CORS matters when script wants access to the response, such as reading a canvas containing the image."
+  },
+  {
+    title: "When OPTIONS comes first",
+    intro: "A frontend sends a JSON POST with a custom X-Trace header to an API. Before the real request, the browser asks for permission.",
+    nodes: [["Frontend", "app.example"], ["OPTIONS", "preflight"], ["API", "api.example"]],
+    question: "Label the browser's first request.",
+    hint: "A request that checks permission before the actual request is called a…",
+    choices: [
+      { text: "<code>OPTIONS</code> preflight", correct: true },
+      { text: "<code>GET</code> redirect", correct: false },
+      { text: "<code>TRACE</code> replay", correct: false }
+    ],
+    explanation: "The preflight is an OPTIONS request. The API should answer with Access-Control-Allow-Origin, Access-Control-Allow-Methods (including POST), and Access-Control-Allow-Headers (including X-Trace)."
+  },
+  {
+    title: "Credentials change the rules",
+    intro: "A dashboard at app.example fetches a user's data from api.example using a session cookie.",
+    nodes: [["Dashboard", "app.example"], ["Cookie", "session"], ["API", "api.example"]],
+    question: "Which server response is compatible with a credentialed CORS request?",
+    hint: "Credentials and a wildcard origin do not mix.",
+    choices: [
+      { text: "<code>Access-Control-Allow-Origin: https://app.example</code> and <code>Access-Control-Allow-Credentials: true</code>", correct: true },
+      { text: "<code>Access-Control-Allow-Origin: *</code> and <code>Access-Control-Allow-Credentials: true</code>", correct: false },
+      { text: "No CORS headers; the cookie makes the request trusted.", correct: false }
+    ],
+    explanation: "The server must explicitly name the origin and opt into credentials. A wildcard Access-Control-Allow-Origin cannot be used with credentials."
+  },
+  {
+    title: "Two APIs, two answers",
+    intro: "A travel frontend calls a weather API and a maps API. One API allows it; the other does not.",
+    nodes: [["Travel app", "travel.example"], ["Weather API", "allowed"], ["Maps API", "blocked"]],
+    question: "What should the frontend expect?",
+    hint: "CORS permission is evaluated per response and per origin.",
+    choices: [
+      { text: "Weather data can be exposed to script while maps data fails with a CORS error.", correct: true },
+      { text: "Because one API allows the app, the browser allows every API.", correct: false },
+      { text: "The browser combines both responses and makes one CORS decision.", correct: false }
+    ],
+    explanation: "Each server controls its own CORS response headers. A successful request to one API does not grant permission to another."
+  },
+  {
+    title: "Put the exchange in order",
+    intro: "Sort these steps for the JSON POST from the frontend in Scenario 3. Drag an item, or use its arrow buttons.",
+    nodes: [["Frontend", "app.example"], ["Browser", "CORS check"], ["API", "api.example"]],
+    type: "order",
+    order: [
+      "The browser sends an OPTIONS preflight.",
+      "The API approves the origin, method, and header.",
+      "The browser sends the actual POST.",
+      "The browser exposes the response to frontend JavaScript."
+    ],
+    explanation: "The browser preflights first, waits for the API's permission, then sends the POST and checks the final response before exposing it."
+  }
+];
+
+const app = document.getElementById("app");
+const steps = document.getElementById("steps");
+let current = 0;
+let selected = null;
+let order = [];
+let answered = false;
+
+function renderSteps() {
+  steps.innerHTML = scenarios.map((scenario, i) => `<li><button type="button" data-step="${i}" aria-current="${i === current ? "step" : "false"}"><span class="step-number">${i + 1}</span>${scenario.title}</button></li>`).join("");
+  steps.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
+    current = Number(button.dataset.step); selected = null; answered = false; render();
+  }));
+}
+
+function diagram(nodes) {
+  return `<div class="diagram" aria-label="Scenario diagram">${nodes.map((node, i) => `${i ? '<span class="arrow" aria-hidden="true">→</span>' : ""}<div class="node"><strong>${node[0]}</strong><small>${node[1]}</small></div>`).join("")}</div>`;
+}
+
+function render() {
+  renderSteps();
+  if (current === scenarios.length) {
+    app.innerHTML = `<div class="finish"><div class="mark">✓</div><div class="eyebrow">Practice complete</div><h2>You can reason about CORS.</h2><p>You followed the path from origins and simple resources to preflights, credentials, independent API permissions, and the full request sequence.</p><button class="primary" id="restart" type="button">Practice again</button></div>`;
+    document.getElementById("restart").addEventListener("click", () => { current = 0; render(); });
+    return;
+  }
+  const scenario = scenarios[current];
+  if (scenario.type === "order") renderOrder(scenario);
+  else renderChoice(scenario);
+}
+
+function renderChoice(scenario) {
+  app.innerHTML = `<div class="scenario-label">SCENARIO ${current + 1} OF ${scenarios.length}</div><h2>${scenario.title}</h2><p class="scenario-intro">${scenario.intro}</p>${diagram(scenario.nodes)}<div class="question"><h3>${scenario.question}</h3><p class="hint">${scenario.hint}</p><div class="choices">${scenario.choices.map((choice, i) => `<button type="button" class="choice ${selected === i ? "selected" : ""} ${answered && choice.correct ? "correct" : ""} ${answered && selected === i && !choice.correct ? "incorrect" : ""}" data-choice="${i}">${choice.text}</button>`).join("")}</div><div class="check-row"><button class="primary" id="check" type="button" ${selected === null || answered ? "disabled" : ""}>${answered ? (current === scenarios.length - 1 ? "Continue" : "Next scenario") : "Check answer"}</button></div>${answered ? `<div class="feedback ${scenario.choices[selected].correct ? "good" : "try"}"><strong>${scenario.choices[selected].correct ? "Correct." : "Not quite."}</strong><p>${scenario.explanation}</p></div>` : ""}</div>`;
+  app.querySelectorAll("[data-choice]").forEach(button => button.addEventListener("click", () => { if (!answered) { selected = Number(button.dataset.choice); renderChoice(scenario); } }));
+  document.getElementById("check").addEventListener("click", () => { if (answered) return; answered = true; renderChoice(scenario); });
+  if (answered) {
+    const next = document.getElementById("check");
+    next.disabled = false;
+    next.addEventListener("click", () => { current++; selected = null; answered = false; render(); });
+  }
+}
+
+function renderOrder(scenario) {
+  if (!order.length) order = [...scenario.order].sort(() => Math.random() - .5);
+  app.innerHTML = `<div class="scenario-label">SCENARIO ${current + 1} OF ${scenarios.length}</div><h2>${scenario.title}</h2><p class="scenario-intro">${scenario.intro}</p>${diagram(scenario.nodes)}<div class="question"><h3>What happens first, second, third, and fourth?</h3><p class="hint">Drag the cards into order. The arrow buttons also work with a keyboard.</p><ol class="order-list" id="order-list">${order.map((item, i) => `<li class="order-item" draggable="true" data-index="${i}"><span class="drag-handle" aria-hidden="true">⠿</span><span class="order-text">${item}</span><button class="move" type="button" data-move="${i},-1" aria-label="Move item up" ${i === 0 ? "disabled" : ""}>↑</button><button class="move" type="button" data-move="${i},1" aria-label="Move item down" ${i === order.length - 1 ? "disabled" : ""}>↓</button></li>`).join("")}</ol><div class="check-row"><button class="primary" id="check-order" type="button">${answered ? "Next scenario" : "Check order"}</button></div>${answered ? `<div class="feedback ${order.every((item, i) => item === scenario.order[i]) ? "good" : "try"}"><strong>${order.every((item, i) => item === scenario.order[i]) ? "Correct." : "Not quite."}</strong><p>${scenario.explanation}</p></div>` : ""}</div>`;
+  app.querySelectorAll("[data-move]").forEach(button => button.addEventListener("click", () => { const [index, direction] = button.dataset.move.split(",").map(Number); const target = index + direction; if (target >= 0 && target < order.length) [order[index], order[target]] = [order[target], order[index]]; renderOrder(scenario); }));
+  const list = document.getElementById("order-list");
+  let dragged;
+  list.querySelectorAll(".order-item").forEach(item => {
+    item.addEventListener("dragstart", () => { dragged = Number(item.dataset.index); item.classList.add("dragging"); });
+    item.addEventListener("dragend", () => item.classList.remove("dragging"));
+    item.addEventListener("dragover", event => event.preventDefault());
+    item.addEventListener("drop", event => { event.preventDefault(); const target = Number(item.dataset.index); const [moved] = order.splice(dragged, 1); order.splice(target, 0, moved); renderOrder(scenario); });
+  });
+  document.getElementById("check-order").addEventListener("click", () => { if (answered) { current++; order = []; answered = false; render(); } else { answered = true; renderOrder(scenario); } });
+}
+
+const root = document.documentElement;
+let theme = "light";
+try { theme = localStorage.getItem("cors-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); } catch (e) {}
+function setTheme(value) { theme = value; value === "dark" ? root.setAttribute("data-theme", "dark") : root.removeAttribute("data-theme"); document.getElementById("theme-toggle").textContent = value === "dark" ? "Light mode" : "Dark mode"; try { localStorage.setItem("cors-theme", value); } catch (e) {} }
+document.getElementById("theme-toggle").addEventListener("click", () => setTheme(theme === "dark" ? "light" : "dark"));
+setTheme(theme);
+render();
+</script>
+</body>
+</html>
