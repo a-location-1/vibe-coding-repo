@@ -16,7 +16,7 @@
 > - **Tool:** Copilot SDK in VS Code · 2026-11-03
 > - **Session:** fresh · attached: [CONVENTIONS.md]
 > - **Verified:** agent-tested
-> - **Human edits:** none
+> - **Human edits:** adjusted title and subtitle
 
 Review conventions.md.
 
@@ -37,4 +37,17 @@ The scenarios should be progressive, it should start very simple and each scenar
 
 ## Output 1:
 
-Built [cors-practice.html](./cors-practice.html), a self-contained progressive CORS practice app with six scenarios covering origins, resource display, OPTIONS preflight, credentials, multiple APIs, and request ordering. It includes diagrams, immediate feedback, dark mode, and accessible drag-and-drop ordering controls.
+Built [cors-practice.html](./cors-practice.html), a self-contained progressive CORS practice app with nine scenarios covering origins, a concrete travel-blog image example, diagram labeling, a one-word OPTIONS checkpoint, browser-vs-network controls, credentials, multiple APIs, short answers, and request ordering. It includes immediate feedback, dark mode, accessible keyboard alternatives for drag-and-drop ordering, and guarded scenario transitions.
+
+# Prompt 2 (what this prompt is for):
+
+> - **Tool:** Copilot SDK in VS Code · 2026-11-03
+> - **Session:** continued · attached: none
+> - **Verified:** agent-tested
+> - **Human edits:** none
+
+Add more context to the learning materials, including a travel blog displaying an image from a country's tourism website, and a scenario distinguishing browser-level controls from network-level controls. Add more diverse interactions, including diagram labels and short-answer text boxes. Before longer short answers, add very short text answers for terms such as OPTIONS. Also fix the bug where repeatedly clicking "Next scenario" could advance too quickly.
+
+## Output 2:
+
+Expanded the learning sequence with richer real-world context, a browser-vs-network explanation scenario, diagram-labeling questions, a one-word OPTIONS checkpoint, and a preflight-header short-answer exercise. Added guarded scenario transitions so repeated clicks cannot skip scenarios, reset interaction state reliably, and validated the new interactions in the browser.

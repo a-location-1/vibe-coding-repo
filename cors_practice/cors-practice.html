@@ -55,6 +55,13 @@
   .choice.correct { border-color: var(--green); background: var(--green-soft); }
   .choice.incorrect { border-color: var(--red); background: var(--red-soft); }
   .choice code { font-size: .9em; }
+  .label-grid { display: grid; gap: 10px; }
+  .label-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(145px, .7fr); gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); padding: 11px 13px; }
+  .label-row strong { display: block; font-size: .92rem; }
+  .label-row small { color: var(--muted); }
+  select, .short-answer { width: 100%; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--ink); padding: 9px 10px; }
+  .short-answer { min-height: 76px; resize: vertical; font: inherit; }
+  .answer-label { display: block; margin-bottom: 7px; font-weight: 700; }
   .check-row { display: flex; justify-content: flex-end; margin-top: 18px; }
   .primary { border: 0; border-radius: 8px; background: var(--blue); color: #fff; font-weight: 700; padding: 11px 17px; }
   .primary:hover { filter: brightness(.9); }
@@ -88,12 +95,12 @@
 <main>
   <header>
     <div class="eyebrow">Interactive practice</div>
-    <h1>CORS, one request at a time.</h1>
-    <p>Work through progressively trickier scenarios. Learn to spot origins, preflights, response headers, and credentials without memorizing a checklist.</p>
+    <h1>Cross-Origin Resource Sharing (CORS)</h1>
+    <p>Complete the scenarios to practice CORS in context.</p>
   </header>
   <div class="layout">
     <nav class="progress" aria-label="Scenario progress">
-      <h2>Six scenarios</h2>
+      <h2 id="scenario-count">Scenarios</h2>
       <ol class="steps" id="steps"></ol>
     </nav>
     <section class="card" id="app" aria-live="polite"></section>
@@ -116,8 +123,8 @@ const scenarios = [
   },
   {
     title: "A blog and an image",
-    intro: "A blog at blog.example displays an image hosted on images.example. Not every cross-origin use has the same rules.",
-    nodes: [["Blog page", "blog.example"], ["<img>", "images.example"]],
+    intro: "A travel writer at wander-notes.example is publishing a guide to Costa Rica. The country's tourism board hosts a beautiful waterfall photo at turismo.cr.example, and the writer wants to display it in the article.",
+    nodes: [["Travel blog", "wander-notes.example"], ["Waterfall photo", "turismo.cr.example"]],
     question: "Which statement is most accurate?",
     hint: "Displaying a resource and reading its bytes are different capabilities.",
     choices: [
@@ -125,20 +132,39 @@ const scenarios = [
       { text: "Every cross-origin image request requires an OPTIONS preflight.", correct: false },
       { text: "CORS blocks the browser from displaying every cross-origin image.", correct: false }
     ],
-    explanation: "Some HTML elements can request cross-origin resources. CORS matters when script wants access to the response, such as reading a canvas containing the image."
+    explanation: "The browser can usually display a cross-origin image in an img element. CORS becomes important if the blog's JavaScript needs to read the image bytes, inspect it, or draw it into a canvas without that canvas becoming tainted."
   },
   {
-    title: "When OPTIONS comes first",
+    title: "Label the request path",
+    intro: "A meal-planning frontend at kitchen.example asks recipes.example for a JSON recipe. Label each part of the diagram with the role it plays.",
+    nodes: [["Meal planner", "kitchen.example"], ["Browser", "enforces CORS"], ["Recipe API", "recipes.example"]],
+    type: "label",
+    labels: ["The page making the cross-origin request", "The browser-side policy enforcer", "The server deciding what to allow"],
+    labelOptions: ["Requesting origin", "Browser", "Resource server"],
+    answers: [0, 1, 2],
+    question: "Match each diagram node to its role.",
+    hint: "Think about who sends the request, who enforces the rule, and who sends the response headers.",
+    explanation: "The page is the requesting origin, the browser enforces CORS before exposing the response, and the resource server opts in with response headers."
+  },
+  {
+    title: "Type the preflight method",
     intro: "A frontend sends a JSON POST with a custom X-Trace header to an API. Before the real request, the browser asks for permission.",
     nodes: [["Frontend", "app.example"], ["OPTIONS", "preflight"], ["API", "api.example"]],
-    question: "Label the browser's first request.",
-    hint: "A request that checks permission before the actual request is called a…",
-    choices: [
-      { text: "<code>OPTIONS</code> preflight", correct: true },
-      { text: "<code>GET</code> redirect", correct: false },
-      { text: "<code>TRACE</code> replay", correct: false }
-    ],
+    type: "keyword",
+    question: "What HTTP method does the browser use for this permission check?",
+    hint: "Type the method name exactly. It is six letters and is commonly written in uppercase.",
+    answer: "OPTIONS",
     explanation: "The preflight is an OPTIONS request. The API should answer with Access-Control-Allow-Origin, Access-Control-Allow-Methods (including POST), and Access-Control-Allow-Headers (including X-Trace)."
+  },
+  {
+    title: "The network is not the browser",
+    intro: "A weather dashboard at forecast.example calls data.meteo.example. The API team checks its server logs and sees the request arrive with a 200 response, but the dashboard still reports a CORS error.",
+    nodes: [["Dashboard", "JavaScript"], ["Internet", "request succeeds"], ["Weather API", "HTTP 200"]],
+    type: "short",
+    question: "In one or two sentences, explain how the request can succeed at the network level while the dashboard cannot use the response.",
+    hint: "Separate “did the server receive and answer?” from “did JavaScript receive permission to read it?”",
+    keywords: ["browser", "cors"],
+    explanation: "CORS is a browser-level control, not a network firewall. The request can travel to the API and receive a 200 response while the browser withholds that response from JavaScript because the API's CORS headers do not authorize forecast.example.",
   },
   {
     title: "Credentials change the rules",
@@ -155,7 +181,7 @@ const scenarios = [
   },
   {
     title: "Two APIs, two answers",
-    intro: "A travel frontend calls a weather API and a maps API. One API allows it; the other does not.",
+    intro: "A trip-planning app at trail-guide.example combines a forecast from weather.example and trail geometry from maps.example. The two outside services have different CORS policies.",
     nodes: [["Travel app", "travel.example"], ["Weather API", "allowed"], ["Maps API", "blocked"]],
     question: "What should the frontend expect?",
     hint: "CORS permission is evaluated per response and per origin.",
@@ -165,6 +191,16 @@ const scenarios = [
       { text: "The browser combines both responses and makes one CORS decision.", correct: false }
     ],
     explanation: "Each server controls its own CORS response headers. A successful request to one API does not grant permission to another."
+  },
+  {
+    title: "Name the preflight pieces",
+    intro: "A museum guide at city-walks.example sends a JSON POST to tickets.example with an X-Booking-Id header. The API must describe what it will permit.",
+    nodes: [["City walks", "city-walks.example"], ["OPTIONS", "preflight"], ["Tickets API", "tickets.example"]],
+    type: "short",
+    question: "Name two response headers the tickets API should use to approve this preflight.",
+    hint: "One header names the origin. The other describes either the method or the custom header.",
+    keywords: ["allow-origin", "allow-methods", "allow-headers"],
+    explanation: "A useful answer includes Access-Control-Allow-Origin plus Access-Control-Allow-Methods or Access-Control-Allow-Headers. The latter must include the requested custom header X-Booking-Id."
   },
   {
     title: "Put the exchange in order",
@@ -185,13 +221,18 @@ const app = document.getElementById("app");
 const steps = document.getElementById("steps");
 let current = 0;
 let selected = null;
+let labelAnswers = [];
+let keywordAnswer = "";
+let textAnswer = "";
 let order = [];
 let answered = false;
+let advanceLocked = false;
 
 function renderSteps() {
+  document.getElementById("scenario-count").textContent = `${scenarios.length} scenarios`;
   steps.innerHTML = scenarios.map((scenario, i) => `<li><button type="button" data-step="${i}" aria-current="${i === current ? "step" : "false"}"><span class="step-number">${i + 1}</span>${scenario.title}</button></li>`).join("");
   steps.querySelectorAll("button").forEach(button => button.addEventListener("click", () => {
-    current = Number(button.dataset.step); selected = null; answered = false; render();
+    current = Number(button.dataset.step); selected = null; labelAnswers = []; keywordAnswer = ""; textAnswer = ""; answered = false; order = []; render();
   }));
 }
 
@@ -203,12 +244,30 @@ function render() {
   renderSteps();
   if (current === scenarios.length) {
     app.innerHTML = `<div class="finish"><div class="mark">✓</div><div class="eyebrow">Practice complete</div><h2>You can reason about CORS.</h2><p>You followed the path from origins and simple resources to preflights, credentials, independent API permissions, and the full request sequence.</p><button class="primary" id="restart" type="button">Practice again</button></div>`;
-    document.getElementById("restart").addEventListener("click", () => { current = 0; render(); });
+    document.getElementById("restart").addEventListener("click", () => { current = 0; selected = null; labelAnswers = []; keywordAnswer = ""; textAnswer = ""; answered = false; order = []; render(); });
     return;
   }
   const scenario = scenarios[current];
   if (scenario.type === "order") renderOrder(scenario);
+  else if (scenario.type === "label") renderLabel(scenario);
+  else if (scenario.type === "keyword") renderKeyword(scenario);
+  else if (scenario.type === "short") renderShort(scenario);
   else renderChoice(scenario);
+}
+
+function advanceScenario(button) {
+  if (advanceLocked || button.dataset.advancing === "true") return;
+  advanceLocked = true;
+  button.dataset.advancing = "true";
+  current++;
+  selected = null;
+  labelAnswers = [];
+  keywordAnswer = "";
+  textAnswer = "";
+  answered = false;
+  order = [];
+  render();
+  setTimeout(() => { advanceLocked = false; }, 300);
 }
 
 function renderChoice(scenario) {
@@ -218,8 +277,32 @@ function renderChoice(scenario) {
   if (answered) {
     const next = document.getElementById("check");
     next.disabled = false;
-    next.addEventListener("click", () => { current++; selected = null; answered = false; render(); });
+    next.addEventListener("click", () => advanceScenario(next));
   }
+}
+
+function renderLabel(scenario) {
+  if (!labelAnswers.length) labelAnswers = scenario.labels.map(() => "");
+  const correct = labelAnswers.every((answer, i) => Number(answer) === scenario.answers[i]);
+  app.innerHTML = `<div class="scenario-label">SCENARIO ${current + 1} OF ${scenarios.length}</div><h2>${scenario.title}</h2><p class="scenario-intro">${scenario.intro}</p>${diagram(scenario.nodes)}<div class="question"><h3>${scenario.question}</h3><p class="hint">${scenario.hint}</p><div class="label-grid">${scenario.labels.map((label, i) => `<label class="label-row"><span><strong>${scenario.nodes[i][0]}</strong><small>${label}</small></span><select data-label="${i}" ${answered ? "disabled" : ""}><option value="">Choose a role…</option>${scenario.labelOptions.map((option, j) => `<option value="${j}" ${labelAnswers[i] !== "" && Number(labelAnswers[i]) === j ? "selected" : ""}>${option}</option>`).join("")}</select></label>`).join("")}</div><div class="check-row"><button class="primary" id="check-label" type="button" ${!answered && labelAnswers.some(answer => answer === "") ? "disabled" : ""}>${answered ? "Next scenario" : "Check labels"}</button></div>${answered ? `<div class="feedback ${correct ? "good" : "try"}"><strong>${correct ? "Correct." : "Not quite."}</strong><p>${scenario.explanation}</p></div>` : ""}</div>`;
+  app.querySelectorAll("[data-label]").forEach(select => select.addEventListener("change", () => { labelAnswers[Number(select.dataset.label)] = select.value; renderLabel(scenario); }));
+  document.getElementById("check-label").addEventListener("click", event => { if (answered) advanceScenario(event.currentTarget); else { answered = true; renderLabel(scenario); } });
+}
+
+function renderKeyword(scenario) {
+  const correct = keywordAnswer.trim().toUpperCase() === scenario.answer;
+  app.innerHTML = `<div class="scenario-label">SCENARIO ${current + 1} OF ${scenarios.length}</div><h2>${scenario.title}</h2><p class="scenario-intro">${scenario.intro}</p>${diagram(scenario.nodes)}<div class="question"><h3>${scenario.question}</h3><p class="hint">${scenario.hint}</p><label class="answer-label" for="keyword-answer">Your answer</label><input class="short-answer" id="keyword-answer" type="text" maxlength="20" autocomplete="off" placeholder="Type one word…" ${answered ? "disabled" : ""}><div class="check-row"><button class="primary" id="check-keyword" type="button" ${!answered && keywordAnswer.trim().length === 0 ? "disabled" : ""}>${answered ? "Next scenario" : "Check answer"}</button></div>${answered ? `<div class="feedback ${correct ? "good" : "try"}"><strong>${correct ? "Correct." : "Not quite."}</strong><p>${scenario.explanation}</p></div>` : ""}</div>`;
+  document.getElementById("keyword-answer").value = keywordAnswer;
+  document.getElementById("keyword-answer").addEventListener("input", event => { keywordAnswer = event.target.value; document.getElementById("check-keyword").disabled = keywordAnswer.trim().length === 0; });
+  document.getElementById("check-keyword").addEventListener("click", event => { if (answered) advanceScenario(event.currentTarget); else { answered = true; renderKeyword(scenario); } });
+}
+
+function renderShort(scenario) {
+  const good = scenario.keywords.every(keyword => textAnswer.toLowerCase().includes(keyword));
+  app.innerHTML = `<div class="scenario-label">SCENARIO ${current + 1} OF ${scenarios.length}</div><h2>${scenario.title}</h2><p class="scenario-intro">${scenario.intro}</p>${diagram(scenario.nodes)}<div class="question"><h3>${scenario.question}</h3><p class="hint">${scenario.hint}</p><label class="answer-label" for="short-answer">Your explanation</label><textarea class="short-answer" id="short-answer" maxlength="500" placeholder="Type your explanation here…" ${answered ? "disabled" : ""}></textarea><div class="check-row"><button class="primary" id="check-short" type="button" ${!answered && textAnswer.trim().length < 8 ? "disabled" : ""}>${answered ? "Next scenario" : "Check explanation"}</button></div>${answered ? `<div class="feedback ${good ? "good" : "try"}"><strong>${good ? "Good explanation." : "Keep refining it."}</strong><p>${scenario.explanation}</p></div>` : ""}</div>`;
+  document.getElementById("short-answer").value = textAnswer;
+  document.getElementById("short-answer").addEventListener("input", event => { textAnswer = event.target.value; document.getElementById("check-short").disabled = textAnswer.trim().length < 8; });
+  document.getElementById("check-short").addEventListener("click", event => { if (answered) advanceScenario(event.currentTarget); else { answered = true; renderShort(scenario); } });
 }
 
 function renderOrder(scenario) {
@@ -234,7 +317,7 @@ function renderOrder(scenario) {
     item.addEventListener("dragover", event => event.preventDefault());
     item.addEventListener("drop", event => { event.preventDefault(); const target = Number(item.dataset.index); const [moved] = order.splice(dragged, 1); order.splice(target, 0, moved); renderOrder(scenario); });
   });
-  document.getElementById("check-order").addEventListener("click", () => { if (answered) { current++; order = []; answered = false; render(); } else { answered = true; renderOrder(scenario); } });
+  document.getElementById("check-order").addEventListener("click", event => { if (answered) advanceScenario(event.currentTarget); else { answered = true; renderOrder(scenario); } });
 }
 
 const root = document.documentElement;
