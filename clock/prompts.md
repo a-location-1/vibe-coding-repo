@@ -3,9 +3,9 @@
 > - **Files:** clock.html
 > - **Dates:** 2026-11-03 → 2026-11-03
 > - **Defaults:** Copilot · AI assistant using Copilot SDK in VS Code
-> - **Status:** prototype
+> - **Status:** keeper
 > - **Use:** none
-> - **Reusability:** artifact TBD · prompt pattern TBD
+> - **Reusability:** artifact: possibly · prompt pattern: no
 > - **Tags:** single-file-html, site
 > - **Takeaway:** Trying to make 3D geometry without a system that supports this is extremely difficult, and is a challenge for the AI agent. 
 > - **Story value:** anecdote
