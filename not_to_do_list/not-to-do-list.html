@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not To Do List</title>
+<style>
+  :root {
+    --paper: #f5f5f3;
+    --ink: #242424;
+    --muted: #6c6c68;
+    --line: #d4d4d0;
+    --accent: #3f3f3c;
+    --accent-dark: #1f1f1e;
+    --white: #ffffff;
+    --toggle-bg: #e8e8e5;
+  }
+
+  [data-theme="dark"] {
+    --paper: #1c1c1b;
+    --ink: #ededeb;
+    --muted: #a7a7a1;
+    --line: #484844;
+    --accent: #e2e2de;
+    --accent-dark: #ffffff;
+    --white: #292927;
+    --toggle-bg: #353532;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    transition: background-color .2s, color .2s;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    border-color: var(--line);
+    background: var(--toggle-bg);
+    color: var(--ink);
+    font-size: .9rem;
+    padding: 7px 10px;
+  }
+
+  .theme-toggle:hover { background: var(--line); }
+
+  main {
+    width: min(100% - 32px, 680px);
+    margin: 0 auto;
+    padding: 48px 0 64px;
+  }
+
+  header {
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2rem, 8vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+  }
+
+  .intro {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .entry {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  input[type="text"] {
+    min-width: 0;
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--white);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1rem;
+    padding: 12px 13px;
+  }
+
+  input[type="text"]:focus-visible,
+  button:focus-visible,
+  input[type="checkbox"]:focus-visible + label {
+    outline: 3px solid #b99a7c;
+    outline-offset: 2px;
+  }
+
+  button {
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    background: var(--accent);
+    color: var(--white);
+    cursor: pointer;
+    font: inherit;
+    padding: 10px 14px;
+  }
+
+  button:hover { background: var(--accent-dark); }
+  button:disabled { cursor: not-allowed; opacity: .55; }
+
+  .secondary {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .secondary:hover {
+    background: #eee5da;
+    color: var(--accent-dark);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .status {
+    min-height: 1.4em;
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+
+  .status[role="alert"] { color: var(--accent-dark); }
+
+  .list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--white);
+    padding: 13px;
+  }
+
+  .item input { margin-top: 4px; accent-color: var(--accent); }
+
+  .item label {
+    flex: 1;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+
+  .item.done label {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .empty {
+    border: 1px dashed var(--line);
+    color: var(--muted);
+    padding: 22px 16px;
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .entry { flex-direction: column; }
+    .entry button { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">Dark mode</button>
+<main>
+  <header>
+    <h1>Not To Do List</h1>
+    <p class="intro">A practical record of tasks best left unfinished.</p>
+  </header>
+
+  <form class="entry" id="entry-form">
+    <label for="item-input" hidden>Add a not-to-do item</label>
+    <input id="item-input" type="text" maxlength="160" placeholder="Add something not to do..." autocomplete="off">
+    <button type="submit">Add item</button>
+  </form>
+
+  <div class="actions">
+    <button class="secondary" id="suggest-button" type="button">Add suggested list items</button>
+    <button class="secondary" id="clear-button" type="button">Clear list</button>
+  </div>
+
+  <p class="status" id="status" aria-live="polite"></p>
+  <ul class="list" id="list"></ul>
+</main>
+
+<script>
+const MAX_ITEMS = 20;
+const SUGGESTIONS = [
+  "Don't schedule a meeting to decide whether another meeting is necessary.",
+  "Don't schedule a meeting without an agenda.",
+  "Don't invite everyone to a meeting that needs two people.",
+  "Don't leave action items unassigned after a meeting.",
+  "Don't postpone documenting a decision until nobody remembers it.",
+  "Don't start a project before agreeing on what finished means.",
+  "Don't add a new task to the sprint without removing an old one.",
+  "Don't send a status update that contains no status.",
+  "Don't promise a deadline before checking the calendar.",
+  "Don't keep attending a recurring meeting that no longer has a purpose.",
+  "Don't forward a problem without including the relevant context.",
+  "Don't approve work you have not reviewed.",
+  "Don't write a report before determining who will read it.",
+  "Don't learn a new software tool when the existing one is sufficient.",
+  "Don't take a course without scheduling time to complete it.",
+  "Don't practice a skill only by researching how to practice it.",
+  "Don't add a book to the reading list before finishing the current one.",
+  "Don't make a presentation longer to compensate for missing preparation.",
+  "Don't revise a document indefinitely after it is already clear.",
+  "Don't open another browser tab to avoid making a decision.",
+  "Don't create a spreadsheet to track an item you can remember.",
+  "Don't make a backup after losing the original.",
+  "Don't leave old files in a shared folder because deleting them feels final.",
+  "Don't rename a file without updating the links to it.",
+  "Don't use the same password for every account.",
+  "Don't grant access to a document more broadly than necessary.",
+  "Don't install an update during a presentation.",
+  "Don't troubleshoot a problem without first reproducing it.",
+  "Don't close a support ticket before confirming the issue is resolved.",
+  "Don't buy software before checking whether you already have it.",
+  "Don't grocery shop without checking what is already in the kitchen.",
+  "Don't grocery shop, forget an item, and go back a second time in one day.",
+  "Don't start cooking before reading the entire recipe.",
+  "Don't prepare a meal that requires an ingredient you have not purchased.",
+  "Don't put off cleaning a spill until it becomes a repair.",
+  "Don't begin a repair without locating the correct replacement part.",
+  "Don't paint a room before protecting the floor.",
+  "Don't postpone replacing a smoke detector battery.",
+  "Don't wash clothes without checking the pockets.",
+  "Don't run the dishwasher for three items.",
+  "Don't put leftovers in the refrigerator without labeling the date.",
+  "Don't buy storage containers before measuring the space.",
+  "Don't organize a closet by moving everything to the floor.",
+  "Don't start a home improvement project the night before guests arrive.",
+  "Don't leave a small maintenance problem for the next resident.",
+  "Don't pack for a trip before checking the weather.",
+  "Don't book a vacation without checking the passport requirements.",
+  "Don't plan an itinerary with no time between activities.",
+  "Don't leave for the airport without checking the departure time.",
+  "Don't pack a suitcase without checking the baggage allowance.",
+  "Don't return from vacation without replacing the essentials you used.",
+  "Don't agree to host an event before checking the capacity of your home.",
+  "Don't invite guests before deciding what you will serve.",
+  "Don't shop for a gift without checking whether the recipient already owns it.",
+  "Don't buy a large quantity of an item you have not tried.",
+  "Don't sign a contract before reading the cancellation terms.",
+  "Don't renew a subscription without checking whether you used it.",
+  "Don't pay a bill without confirming the account and amount.",
+  "Don't ignore a fee because it is smaller than the inconvenience of disputing it.",
+  "Don't postpone filing a form until the deadline day.",
+  "Don't throw away a receipt before checking the return policy.",
+  "Don't schedule an appointment without recording the date and location.",
+  "Don't accept an invitation before checking your existing commitments.",
+  "Don't make plans that depend on everyone being exactly on time.",
+  "Don't volunteer for a task without estimating the time it requires.",
+  "Don't start an exercise plan by choosing a schedule you cannot maintain.",
+  "Don't skip a warm-up because the workout is short.",
+  "Don't buy equipment before trying the activity.",
+  "Don't make a doctor's appointment without writing down the questions.",
+  "Don't ignore a recurring symptom because it is inconvenient to investigate.",
+  "Don't leave important paperwork in an inbox indefinitely.",
+  "Don't store a document in a folder with no useful name.",
+  "Don't keep a task on the list after delegating it.",
+  "Don't mark a task complete when only the easiest part is finished.",
+  "Don't add a deadline without adding a reminder.",
+  "Don't plan tomorrow before accounting for unfinished work today.",
+  "Don't spend an hour perfecting a task that takes five minutes.",
+  "Don't answer every notification as if it were urgent.",
+  "Don't check email repeatedly instead of processing it.",
+  "Don't begin the day with the least important task just because it is easy.",
+  "Don't make a to-do list longer than the time available to complete it.",
+  "Don't schedule a reminder to remember the reminder.",
+  "Don't keep a meeting on the calendar because moving it is inconvenient.",
+  "Don't replace a working process before testing the proposed improvement."
+];
+
+const form = document.getElementById("entry-form");
+const input = document.getElementById("item-input");
+const list = document.getElementById("list");
+const status = document.getElementById("status");
+const suggestButton = document.getElementById("suggest-button");
+const clearButton = document.getElementById("clear-button");
+const themeToggle = document.getElementById("theme-toggle");
+let items = [];
+
+function showStatus(message, isAlert = false) {
+  status.textContent = message;
+  status.setAttribute("role", isAlert ? "alert" : "status");
+}
+
+function render() {
+  list.replaceChildren();
+  if (items.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "No unfinished intentions.";
+    list.append(empty);
+  }
+
+  items.forEach((item, index) => {
+    const row = document.createElement("li");
+    row.className = "item" + (item.done ? " done" : "");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = "item-" + index;
+    checkbox.checked = item.done;
+    checkbox.addEventListener("change", () => {
+      item.done = checkbox.checked;
+      render();
+    });
+
+    const label = document.createElement("label");
+    label.htmlFor = checkbox.id;
+    label.textContent = item.text;
+
+    row.append(checkbox, label);
+    list.append(row);
+  });
+
+}
+
+function addItem(text) {
+  const cleanText = text.trim();
+  if (!cleanText || items.length >= MAX_ITEMS) return false;
+  items.push({ text: cleanText, done: false });
+  render();
+  return true;
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (addItem(input.value)) {
+    input.value = "";
+    input.focus();
+    showStatus("Item added.");
+  }
+});
+
+suggestButton.addEventListener("click", () => {
+  if (items.length >= MAX_ITEMS) {
+    showStatus("That's plenty of to-don't items for one day. Complete some of the existing items to add more.", true);
+    return;
+  }
+
+  const available = SUGGESTIONS.filter((suggestion) => !items.some((item) => item.text === suggestion));
+  const shuffled = available.sort(() => Math.random() - 0.5);
+  const numberToAdd = Math.min(5, MAX_ITEMS - items.length);
+  shuffled.slice(0, numberToAdd).forEach(addItem);
+  showStatus(numberToAdd === 5 ? "Five suggested items added." : `${numberToAdd} suggested item${numberToAdd === 1 ? "" : "s"} added. The limit is now reached.`);
+});
+
+clearButton.addEventListener("click", () => {
+  items.forEach((item) => { item.done = true; });
+  items = [];
+  render();
+  showStatus("List cleared.");
+});
+
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const dark = theme === "dark";
+  themeToggle.textContent = dark ? "Light mode" : "Dark mode";
+  themeToggle.setAttribute("aria-label", `Switch to ${dark ? "light" : "dark"} mode`);
+  try { localStorage.setItem("not-to-do-theme", theme); } catch (error) {}
+}
+
+let savedTheme = "light";
+try { savedTheme = localStorage.getItem("not-to-do-theme") || "light"; } catch (error) {}
+setTheme(savedTheme === "dark" ? "dark" : "light");
+themeToggle.addEventListener("click", () => {
+  setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+});
+
+render();
+</script>
+</body>
+</html>
