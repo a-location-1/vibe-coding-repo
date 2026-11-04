@@ -119,5 +119,4 @@ Use these, and add a new one only when none fits, then add it here.
 
 ## Index
 
-`ideas.md` is the backlog. `index.html` is the public landing page, where each project is one entry in its `PROJECTS` array. When a project reaches `keeper`, add it there.
-
+`ideas.md` is the backlog. `index.html` is the public landing page, where every project is one entry in its `PROJECTS` array. Abandoned projects are not displayed; prototype projects are displayed with hatching to indicate that they are in progress.

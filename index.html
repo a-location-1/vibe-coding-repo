@@ -44,12 +44,21 @@
     background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
     box-shadow: var(--glow); transition: border-color .15s, transform .15s;
   }
+  a.card.prototype { position: relative; }
+  a.card.prototype::after {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: repeating-linear-gradient(135deg, transparent 0 12px, #85857f 12px 16px);
+    content: ""; opacity: .22;
+  }
+  a.card.prototype > * { position: relative; z-index: 1; }
   a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; transform: translateY(-2px); }
   .thumb { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: var(--bg); border-bottom: 1px solid var(--border); }
   .body { padding: 14px 16px 16px; }
   .body h2 { margin: 0 0 4px; font-size: 1.05rem; text-shadow: var(--glow); }
   .body h2::after { content: " \2192"; color: var(--accent); }
   .body p { margin: 0; font-size: .85rem; color: var(--muted); line-height: 1.4; }
+  .legend { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .8rem; }
+  .legend-swatch { width: 24px; height: 14px; border: 1px solid var(--border); background: repeating-linear-gradient(135deg, transparent 0 7px, #85857f 7px 11px); opacity: .7; }
   .empty { color: var(--muted); }
   footer { margin-top: 24px; color: var(--muted); font-size: .8rem; }
 </style>
@@ -58,7 +67,8 @@
 <canvas id="rain" aria-hidden="true"></canvas>
 <main>
   <header>
-    <h1>vibes<small>small things made with Claude</small></h1>
+    <h1>Project Array<small>Small projects made with AI agents</small></h1>
+    <div class="legend"><span class="legend-swatch" aria-hidden="true"></span> = in progress</div>
     <div class="themes" role="group" aria-label="Theme">
       <button type="button" data-t="light" aria-pressed="false">Light</button>
       <button type="button" data-t="dark" aria-pressed="false">Dark</button>
@@ -75,17 +85,21 @@
    Copy one line, paste it below, edit the fields.
    title, href, desc are required. thumb is optional (any image path/URL).  */
 const PROJECTS = [
-  { title: "Palette Picker",  href: "palette_picker/palette-picker.html",   desc: "Drop in an image and pull out its dominant colors.", thumb: "_thumbs/palette-picker.png" },
-  { title: "Quadrant Matrix", href: "quadrant_matrix/quadrant-matrix.html", desc: "Sort ideas into a 2x2 priority matrix.",           thumb: "_thumbs/quadrant-matrix.svg" },
-  { title: "Not To Do List",  href: "not_to_do_list/not-to-do-list.html",   desc: "Keep track of tasks that should remain unfinished.",     thumb: "_thumbs/not-to-do-list.svg" },
-  { title: "Clock",      href: "clock/clock.html",                     desc: "Check the time.",              thumb: "_thumbs/clock.svg" },
+  { title: "Palette Picker",          href: "palette_picker/palette-picker.html",       desc: "Drop in an image and pull out its dominant colors.",                status: "keeper",    thumb: "_thumbs/palette-picker.png" },
+  { title: "Quadrant Matrix",         href: "quadrant_matrix/quadrant-matrix.html",     desc: "Sort ideas into a 2x2 priority matrix.",                            status: "prototype", thumb: "_thumbs/quadrant-matrix.svg" },
+  { title: "Not To Do List",          href: "not_to_do_list/not-to-do-list.html",       desc: "Keep track of tasks that should remain unfinished.",                  status: "prototype", thumb: "_thumbs/not-to-do-list.svg" },
+  { title: "Wall Clock",              href: "clock/clock.html",                         desc: "Explore a quiet 3D room and check the time.",                       status: "prototype", thumb: "_thumbs/clock.svg" },
+  { title: "CORS Practice",          href: "cors_practice/cors-practice.html",          desc: "Practice Cross-Origin Resource Sharing through interactive scenarios.", status: "keeper",    thumb: "_thumbs/cors-practice.svg" },
+  { title: "Hidden Printable Content", href: "hidden_printable_content/enrollment-report.html", desc: "Explore content that appears only when a report is printed.",       status: "prototype" },
+  { title: "Class Timer",            href: "timer/timers.html",                         desc: "Run gentle timers for in-class activities.",                         status: "prototype" },
 ];
 
 /* ---------- render ---------- */
 const list = document.getElementById("list");
-for (const p of PROJECTS) {
+const visibleProjects = PROJECTS.filter(p => p.status !== "abandoned");
+for (const p of visibleProjects) {
   const a = document.createElement("a");
-  a.className = "card"; a.href = p.href;
+  a.className = "card " + p.status; a.href = p.href;
   if (p.thumb) {
     const img = document.createElement("img");
     img.className = "thumb"; img.src = p.thumb; img.alt = ""; img.loading = "lazy";
@@ -98,7 +112,7 @@ for (const p of PROJECTS) {
   const d = document.createElement("p"); d.textContent = p.desc || "";
   body.append(h, d); a.append(body); list.append(a);
 }
-document.getElementById("count").textContent = PROJECTS.length + (PROJECTS.length === 1 ? " project" : " projects");
+document.getElementById("count").textContent = visibleProjects.length + (visibleProjects.length === 1 ? " project" : " projects");
 
 /* ---------- theme ---------- */
 const root = document.documentElement;

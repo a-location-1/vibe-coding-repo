@@ -3,11 +3,11 @@
 > - **Files:** cors-practice.html
 > - **Dates:** 2026-11-03 → 2026-11-03
 > - **Defaults:** Copilot SDK in VS Code · TBD
-> - **Status:** prototype
-> - **Use:** none yet
-> - **Reusability:** artifact high · prompt pattern medium
+> - **Status:** keeper
+> - **Use:** used for actual education by the creator
+> - **Reusability:** artifact: high · prompt pattern: low
 > - **Tags:** single-file-html, teaching-example, drag-drop, theming
-> - **Takeaway:** TBD
+> - **Takeaway:** AI agents are great at making multiple choice tests, but not so good at making bespoke testing content
 > - **Story value:** anecdote
 > - **Surprises:** TBD
 

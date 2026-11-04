@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#f4f6f8"/>
+  <rect x="18" y="24" width="284" height="152" rx="12" fill="#fff" stroke="#d7dee6" stroke-width="4"/>
+  <rect x="18" y="24" width="284" height="34" rx="12" fill="#e8f2fb"/>
+  <circle cx="40" cy="41" r="5" fill="#1769aa"/>
+  <circle cx="57" cy="41" r="5" fill="#18794e"/>
+  <circle cx="74" cy="41" r="5" fill="#b42318"/>
+  <rect x="42" y="82" width="76" height="58" rx="8" fill="#e8f2fb" stroke="#1769aa" stroke-width="3"/>
+  <rect x="202" y="82" width="76" height="58" rx="8" fill="#e8f6ef" stroke="#18794e" stroke-width="3"/>
+  <path d="M125 111h70m-12-10 12 10-12 10" fill="none" stroke="#1769aa" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+  <text x="80" y="116" fill="#1769aa" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">origin</text>
+  <text x="240" y="116" fill="#18794e" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">server</text>
+</svg>

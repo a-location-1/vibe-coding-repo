@@ -3,7 +3,7 @@
 > - **Files:** clock.html
 > - **Dates:** 2026-11-03 → 2026-11-03
 > - **Defaults:** Copilot · AI assistant using Copilot SDK in VS Code
-> - **Status:** keeper
+> - **Status:** prototype
 > - **Use:** none
 > - **Reusability:** artifact: possibly · prompt pattern: no
 > - **Tags:** single-file-html, site
