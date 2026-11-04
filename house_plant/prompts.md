@@ -35,3 +35,18 @@ The player can mouse-over the upper leaves the house-plant to see the plant heal
 ## Output 1:
 
 Built [house-plant.html](./house-plant.html), a self-contained prototype with a colorful title screen, playable water interaction, persistent plant state, four-decimal moisture and health readouts, and time-based sickness and recovery behavior. Added the project to the landing page and created an SVG thumbnail.
+
+# Prompt 2 (scene cleanup):
+
+> - **Tool:** Copilot · AI assistant using Copilot SDK in VS Code · 2026-11-03
+> - **Session:** continued · attached: none
+> - **Verified:** agent-tested
+> - **Human edits:** Removed title screen subtitle
+
+Remove the text on the screen: "a quiet corner" and the text readout "Your aloe is doing fine."
+
+Move the aloe and pot visually down so that the pot sits on the shelf. Remove the "leg" on the shelf.
+
+## Output 2:
+
+Updated [house-plant.html](./house-plant.html) by removing the requested scene text, positioning the aloe and pot on the shelf, and removing the shelf support leg. Browser loading and JavaScript syntax were verified.
