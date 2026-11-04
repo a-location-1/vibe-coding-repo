@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Plant</title>
+<style>
+  :root { --ink:#2e332c; --cream:#f5f1e8; --terracotta:#c96c4b; --leaf:#3f8f55; }
+  * { box-sizing:border-box; }
+  html, body { min-height:100%; }
+  body { margin:0; overflow:hidden; background:var(--cream); color:var(--ink); font-family:Georgia, "Times New Roman", serif; }
+  button { font:inherit; }
+  .title-screen { position:fixed; inset:0; z-index:5; display:grid; place-items:center; overflow:hidden; background:#fff3bd; transition:opacity .55s, visibility .55s; }
+  .title-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+  .title-screen::before { position:absolute; inset:-25%; content:""; background:conic-gradient(from 25deg, #ff6b6b, #ffd166, #76d275, #54c6eb, #9b7bff, #ff6bca, #ff6b6b); filter:blur(35px); opacity:.72; animation:spin 24s linear infinite; }
+  .burst { position:absolute; inset:0; background:repeating-conic-gradient(from 5deg, transparent 0 7deg, rgba(255,255,255,.24) 7deg 9deg); }
+  .title-card { position:relative; width:min(90vw, 680px); padding:clamp(2rem,7vw,5rem) 2rem 2.4rem; text-align:center; border:8px solid #fff; border-radius:48% 52% 45% 55% / 35% 36% 64% 65%; background:rgba(255,250,220,.72); box-shadow:0 20px 60px rgba(111,63,51,.24); }
+  .title-card h1 { margin:0; color:#e45455; font-size:clamp(3.2rem,11vw,7.5rem); line-height:.86; letter-spacing:-.08em; text-shadow:4px 5px #ffd65a, 8px 9px #67c986; transform:rotate(-3deg); }
+  .title-card p { margin:1.6rem 0 1.4rem; color:#42664e; font-size:clamp(1rem,2.4vw,1.35rem); }
+  .play { border:0; border-radius:999px; padding:.75rem 2.7rem; color:#fff; background:#ef5c55; box-shadow:0 5px 0 #b33d42; cursor:pointer; font-weight:bold; font-size:1.2rem; }
+  .play:hover, .play:focus-visible { background:#fa7365; transform:translateY(-2px); outline:3px solid #fff; }
+  .leaf { position:absolute; width:clamp(45px,9vw,100px); aspect-ratio:.6/1; border-radius:100% 0 100% 0; opacity:.92; animation:float 4s ease-in-out infinite alternate; }
+  .leaf:nth-child(1){left:8%;top:12%;background:#ff7166;transform:rotate(-38deg)} .leaf:nth-child(2){left:20%;bottom:10%;background:#62bc63;transform:rotate(20deg);animation-delay:-1s} .leaf:nth-child(3){right:8%;top:14%;background:#6b91e8;transform:rotate(70deg);animation-delay:-2s} .leaf:nth-child(4){right:18%;bottom:8%;background:#f49e4c;transform:rotate(30deg);animation-delay:-3s} .leaf:nth-child(5){left:4%;top:55%;background:#b878d8;transform:rotate(-70deg);animation-delay:-1.5s} .leaf:nth-child(6){right:4%;top:55%;background:#54c7ad;transform:rotate(110deg);animation-delay:-2.5s}
+  @keyframes spin { to { transform:rotate(360deg); } } @keyframes float { to { margin-top:18px; } }
+  .game { min-height:100vh; display:grid; place-items:center; padding:2rem; }
+  .scene { position:relative; width:min(900px, 92vw); height:min(620px, 82vh); min-height:450px; }
+  .caption { position:absolute; top:0; left:0; color:#8d8a80; letter-spacing:.08em; text-transform:uppercase; font:600 .72rem system-ui,sans-serif; }
+  .plant-area { position:absolute; inset:10% 12% 25%; }
+  .plant { position:absolute; left:50%; bottom:22%; width:260px; height:360px; transform:translateX(-50%); }
+  .leaf-shape { position:absolute; bottom:82px; left:50%; width:48px; height:250px; transform-origin:50% 100%; border-radius:100% 0 100% 0; background:linear-gradient(90deg,#276c47,#76b85d 48%,#2b774c); box-shadow:inset 4px 0 rgba(255,255,255,.2), 3px 4px 6px rgba(34,70,43,.18); }
+  .leaf-shape::after { position:absolute; left:50%; top:5%; bottom:4%; width:2px; content:""; background:rgba(225,245,165,.55); transform:rotate(-5deg); }
+  .leaf-shape:nth-child(1){transform:translateX(-50%) rotate(-38deg);height:250px} .leaf-shape:nth-child(2){transform:translateX(-50%) rotate(-20deg);height:300px;width:55px} .leaf-shape:nth-child(3){transform:translateX(-50%) rotate(0);height:335px;width:56px} .leaf-shape:nth-child(4){transform:translateX(-50%) rotate(20deg);height:290px;width:54px} .leaf-shape:nth-child(5){transform:translateX(-50%) rotate(39deg);height:235px}
+  .pot { position:absolute; left:50%; bottom:0; width:170px; height:125px; transform:translateX(-50%); border-radius:8px 8px 35px 35px; background:linear-gradient(90deg,#a84f3a,#d77a54 50%,#aa503a); box-shadow:inset -12px 0 rgba(93,56,41,.16), 0 9px 10px rgba(50,40,28,.15); }
+  .pot::before { position:absolute; top:-12px; left:-10px; width:190px; height:28px; border-radius:50%; content:""; background:#753e2d; box-shadow:inset 0 6px 0 #4e3229; }
+  .shelf { position:absolute; bottom:18%; left:6%; width:88%; height:33px; border-radius:2px; background:linear-gradient(#b87543,#8b4e2e); box-shadow:0 14px 0 rgba(75,49,32,.14), 0 3px 7px rgba(53,38,28,.22); }
+  .shelf::after { position:absolute; left:7%; top:30px; width:10px; height:70px; content:""; background:#9a5a36; box-shadow:calc(86vw - 130px) 0 #9a5a36; max-width:76%; }
+  .water { position:absolute; right:6%; bottom:calc(18% + 80px); border:1px solid #cfc7b8; border-radius:4px; padding:.65rem 1rem; color:#605b53; background:#fffdf7; cursor:pointer; text-transform:lowercase; box-shadow:0 2px 3px rgba(40,40,30,.08); }
+  .water:hover, .water:focus-visible { border-color:#739b78; color:#356a43; outline:3px solid rgba(115,155,120,.22); }
+  .readout { position:absolute; min-width:185px; padding:.7rem .85rem; border:1px solid #d5cec2; border-radius:7px; color:#4d5148; background:rgba(255,253,247,.96); box-shadow:0 5px 20px rgba(60,50,40,.12); font: .78rem/1.45 system-ui,sans-serif; opacity:0; transform:translateY(5px); transition:.15s; pointer-events:none; }
+  .readout.visible { opacity:1; transform:none; } .readout strong { display:block; font-size:.72rem; color:#898273; text-transform:uppercase; letter-spacing:.08em; } .readout span { font:1.2rem Georgia,serif; color:#386a45; }
+  #moisture-readout { left:calc(50% + 115px); bottom:36%; } #health-readout { left:calc(50% + 120px); bottom:68%; }
+  .plant-zone { position:absolute; cursor:help; } #soil-zone { left:calc(50% - 88px); bottom:25%; width:176px; height:42px; } #health-zone { left:calc(50% - 95px); bottom:61%; width:190px; height:100px; }
+  .status { position:absolute; bottom:4%; left:50%; transform:translateX(-50%); color:#8c887f; font: .8rem system-ui,sans-serif; text-align:center; white-space:nowrap; }
+  .status.sick { color:#b45345; }
+  @media (max-width:620px) { .scene{min-height:400px}.plant{transform:translateX(-50%) scale(.78); transform-origin:bottom center}.water{right:0}.shelf{left:0;width:100%}.shelf::after{display:none}.readout{min-width:155px}.plant-area{inset:10% 3% 25%} #moisture-readout,#health-readout{left:auto;right:0} }
+  @media (prefers-reduced-motion:reduce) { .title-screen::before,.leaf{animation:none} }
+</style>
+</head>
+<body>
+<section class="title-screen" id="title-screen" aria-label="House Plant title screen">
+  <div class="burst" aria-hidden="true"></div><i class="leaf" aria-hidden="true"></i><i class="leaf" aria-hidden="true"></i><i class="leaf" aria-hidden="true"></i><i class="leaf" aria-hidden="true"></i><i class="leaf" aria-hidden="true"></i><i class="leaf" aria-hidden="true"></i>
+  <div class="title-card"><h1>House<br>Plant</h1><p>A tiny aloe with very real feelings.</p><button class="play" id="play" type="button">play</button></div>
+</section>
+<main class="game">
+  <section class="scene" aria-label="Aloe plant on a wall-mounted shelf">
+    <div class="caption">a quiet corner</div>
+    <div class="plant-area">
+      <div class="plant" aria-label="Aloe house plant">
+        <div class="leaf-shape"></div><div class="leaf-shape"></div><div class="leaf-shape"></div><div class="leaf-shape"></div><div class="leaf-shape"></div>
+        <div class="pot"></div>
+      </div>
+      <div class="plant-zone" id="health-zone" tabindex="0" aria-label="Inspect plant health"></div>
+      <div class="plant-zone" id="soil-zone" tabindex="0" aria-label="Inspect soil moisture"></div>
+      <div class="readout" id="health-readout"><strong>Plant health</strong><span id="health-value">5.00000</span> / 5.00000</div>
+      <div class="readout" id="moisture-readout"><strong>Soil moisture</strong><span id="moisture-value">2.50000</span> / 5.00000</div>
+    </div>
+    <div class="shelf" aria-hidden="true"></div>
+    <button class="water" id="water" type="button">water</button>
+    <div class="status" id="status">Your aloe is doing fine.</div>
+  </section>
+</main>
+<script>
+  const KEY = "house-plant-state-v1";
+  const HOUR = 60 * 60 * 1000;
+  const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
+  const randomBetween = (low, high) => low + Math.random() * (high - low);
+  const freshPlant = () => ({ moisture: 2.5, health: 5, lastUpdate: Date.now(), decayDays: randomBetween(7, 10), lowSince: null, highSince: null });
+  let state;
+  try { state = JSON.parse(localStorage.getItem(KEY)) || freshPlant(); } catch (error) { state = freshPlant(); }
+  const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+  function update(now = Date.now()) {
+    const elapsed = Math.max(0, now - state.lastUpdate);
+    state.moisture = clamp(state.moisture - elapsed / (state.decayDays * 24 * HOUR) * 4, 0, 5);
+    const danger = state.moisture < 1 || state.moisture > 4;
+    if (state.moisture < 1) { state.lowSince ??= now; state.highSince = null; }
+    else if (state.moisture > 4) { state.highSince ??= now; state.lowSince = null; }
+    else { state.lowSince = null; state.highSince = null; }
+    if (state.lowSince && now - state.lowSince >= 24 * HOUR) {
+      state.health = clamp(state.health - elapsed / (24 * HOUR), 0, 5);
+    } else if (!danger) {
+      state.health = clamp(state.health + elapsed / (860 * HOUR), 0, 5);
+    }
+    state.lastUpdate = now;
+  }
+  const moistureValue = document.getElementById("moisture-value"), healthValue = document.getElementById("health-value"), status = document.getElementById("status");
+  function render() {
+    update();     moistureValue.textContent = state.moisture.toFixed(5); healthValue.textContent = state.health.toFixed(5);
+    const sick = (state.lowSince && Date.now() - state.lowSince >= 24 * HOUR) || (state.highSince && Date.now() - state.highSince >= 24 * HOUR);
+    status.textContent = sick ? "Your aloe is feeling sick.": "Your aloe is doing fine.";
+    status.classList.toggle("sick", sick); save();
+  }
+  document.getElementById("play").addEventListener("click", () => document.getElementById("title-screen").classList.add("hidden"));
+  document.getElementById("water").addEventListener("click", () => { update(); state.moisture = clamp(state.moisture + randomBetween(3.7, 4.3), 0, 5); state.decayDays = randomBetween(7, 10); state.lastUpdate = Date.now(); save(); render(); });
+  function hoverPair(zone, readout) { zone.addEventListener("mouseenter", () => readout.classList.add("visible")); zone.addEventListener("mouseleave", () => readout.classList.remove("visible")); zone.addEventListener("focus", () => readout.classList.add("visible")); zone.addEventListener("blur", () => readout.classList.remove("visible")); }
+  hoverPair(document.getElementById("soil-zone"), document.getElementById("moisture-readout")); hoverPair(document.getElementById("health-zone"), document.getElementById("health-readout"));
+  render(); setInterval(render, 60 * 1000);
+</script>
+</body>
+</html>
