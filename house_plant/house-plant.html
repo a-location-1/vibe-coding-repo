@@ -29,6 +29,11 @@
   .plant { position:absolute; left:50%; bottom:0; width:260px; height:360px; transform:translateX(-50%); }
   .leaf-shape { position:absolute; bottom:82px; left:50%; width:48px; height:250px; transform-origin:50% 100%; border-radius:100% 0 100% 0; background:linear-gradient(90deg,#276c47,#76b85d 48%,#2b774c); box-shadow:inset 4px 0 rgba(255,255,255,.2), 3px 4px 6px rgba(34,70,43,.18); }
   .leaf-shape::after { position:absolute; left:50%; top:5%; bottom:4%; width:2px; content:""; background:rgba(225,245,165,.55); transform:rotate(-5deg); }
+  .plant.health-low .leaf-shape { background:linear-gradient(90deg,#a8a548,#e2d66b 48%,#98943d); }
+  .plant.health-critical .leaf-shape { background:linear-gradient(90deg,#b2a52f,#f0dc4d 48%,#a29725); }
+  .plant.dead .leaf-shape { background:linear-gradient(90deg,#464843,#777a70 48%,#3b3d3a); box-shadow:inset 4px 0 rgba(255,255,255,.08), 3px 4px 6px rgba(34,34,30,.18); }
+  .plant.health-low .leaf-shape::after, .plant.health-critical .leaf-shape::after { background:rgba(255,248,177,.6); }
+  .plant.dead .leaf-shape::after { background:rgba(210,213,197,.25); }
   .leaf-shape:nth-child(1){transform:translateX(-50%) rotate(-38deg);height:250px} .leaf-shape:nth-child(2){transform:translateX(-50%) rotate(-20deg);height:300px;width:55px} .leaf-shape:nth-child(3){transform:translateX(-50%) rotate(0);height:335px;width:56px} .leaf-shape:nth-child(4){transform:translateX(-50%) rotate(20deg);height:290px;width:54px} .leaf-shape:nth-child(5){transform:translateX(-50%) rotate(39deg);height:235px}
   .pot { position:absolute; left:50%; bottom:0; width:170px; height:125px; transform:translateX(-50%); border-radius:8px 8px 35px 35px; background:linear-gradient(90deg,#a84f3a,#d77a54 50%,#aa503a); box-shadow:inset -12px 0 rgba(93,56,41,.16), 0 9px 10px rgba(50,40,28,.15); }
   .pot::before { position:absolute; top:-12px; left:-10px; width:190px; height:28px; border-radius:50%; content:""; background:#753e2d; box-shadow:inset 0 6px 0 #4e3229; }
@@ -82,7 +87,7 @@
     else { state.lowSince = null; state.highSince = null; }
     if (state.lowSince && now - state.lowSince >= 24 * HOUR) {
       state.health = clamp(state.health - elapsed / (24 * HOUR), 0, 5);
-    } else if (!danger) {
+    } else if (!danger && state.health > 0) {
       state.health = clamp(state.health + elapsed / (860 * HOUR), 0, 5);
     }
     state.lastUpdate = now;
@@ -90,6 +95,10 @@
   const moistureValue = document.getElementById("moisture-value"), healthValue = document.getElementById("health-value");
   function render() {
     update();     moistureValue.textContent = state.moisture.toFixed(5); healthValue.textContent = state.health.toFixed(5);
+    const plant = document.querySelector(".plant");
+    plant.classList.toggle("health-low", state.health < 3.5 && state.health >= 1);
+    plant.classList.toggle("health-critical", state.health < 1 && state.health > 0);
+    plant.classList.toggle("dead", state.health === 0);
     save();
   }
   document.getElementById("play").addEventListener("click", () => document.getElementById("title-screen").classList.add("hidden"));

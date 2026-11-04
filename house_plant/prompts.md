@@ -3,7 +3,7 @@
 > - **Files:** house-plant.html
 > - **Dates:** 2026-11-03 → 2026-11-03
 > - **Defaults:** Copilot · AI assistant using Copilot SDK in VS Code
-> - **Status:** prototype
+> - **Status:** keeper
 > - **Use:** none yet
 > - **Reusability:** artifact: TBD · prompt pattern: TBD
 > - **Tags:** single-file-html, game, localStorage
@@ -50,3 +50,16 @@ Move the aloe and pot visually down so that the pot sits on the shelf. Remove th
 ## Output 2:
 
 Updated [house-plant.html](./house-plant.html) by removing the requested scene text, positioning the aloe and pot on the shelf, and removing the shelf support leg. Browser loading and JavaScript syntax were verified.
+
+# Prompt 3 (plant health appearance):
+
+> - **Tool:** Copilot · AI assistant using Copilot SDK in VS Code · 2026-11-03
+> - **Session:** continued · attached: none
+> - **Verified:** agent-tested
+> - **Human edits:** none
+
+Add health-based leaf colors: slightly yellow below 3.5000 health, very yellow below 1.0000 health, and dark-gray at 0.0000 health. A dead plant should no longer heal when its soil moisture is between 1.0000 and 4.0000.
+
+## Output 3:
+
+Updated [house-plant.html](./house-plant.html) with health-based leaf color states and prevented dead plants from recovering through normal moisture conditions.
