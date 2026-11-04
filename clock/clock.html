@@ -10,6 +10,7 @@
     --pitch: 0deg;
     --room-color: #f8f7f2;
     --room-depth: 620px;
+    --wall-overhang: 120px;
   }
 
   * { box-sizing: border-box; }
@@ -53,7 +54,7 @@
   }
   .side-wall {
     top: 0;
-    width: var(--room-depth);
+    width: calc(var(--room-depth) + var(--wall-overhang));
     height: 100%;
     background: var(--room-color);
     box-shadow: inset 0 0 130px rgba(110,110,110,.2), inset 0 -3px 0 rgba(92,88,80,.2);
@@ -64,14 +65,14 @@
     transform: translateZ(calc(var(--room-depth) * -1)) rotateY(-90deg);
   }
   .side-wall.right {
-    left: calc(100% - var(--room-depth));
+    left: calc(100% - var(--room-depth) - var(--wall-overhang));
     transform-origin: right center;
     transform: translateZ(calc(var(--room-depth) * -1)) rotateY(90deg);
   }
   .floor {
     top: 100%;
-    left: calc(50% - var(--room-depth));
-    width: calc(var(--room-depth) * 2);
+    left: 0;
+    width: 100%;
     height: 1100px;
     background: linear-gradient(180deg, #e7e5df 0%, var(--room-color) 16%, var(--room-color) 100%);
     transform: translateZ(calc(var(--room-depth) * -1)) rotateX(90deg);
@@ -81,8 +82,8 @@
   .ceiling {
     top: auto;
     bottom: 100%;
-    left: calc(50% - var(--room-depth));
-    width: calc(var(--room-depth) * 2);
+    left: 0;
+    width: 100%;
     height: 1100px;
     background: linear-gradient(180deg, var(--room-color) 0%, #e8e6e0 100%);
     transform: translateZ(calc(var(--room-depth) * -1)) rotateX(-90deg);

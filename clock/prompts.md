@@ -3,7 +3,7 @@
 > - **Files:** clock.html
 > - **Dates:** 2026-11-03 → 2026-11-03
 > - **Defaults:** Copilot · AI assistant using Copilot SDK in VS Code
-> - **Status:** prototype
+> - **Status:** keeper
 > - **Use:** none
 > - **Reusability:** artifact: possibly · prompt pattern: no
 > - **Tags:** single-file-html, site
@@ -274,3 +274,16 @@ Review and update the seam logic - everything should be using some kind of share
 ## Output 18:
 
 Rebuilt the room seam geometry in [clock.html](clock.html) around one shared `--room-depth` coordinate. The back wall, side-wall widths and hinges, floor, and ceiling now use that same depth; side walls start at the back-wall edges and extend toward the camera with matching transform origins. Left, right, straight-on, vertical, and diagonal browser checks show exact projected edge joins, with no side-wall barriers or seam gaps. Syntax and whitespace validation passed.
+
+# Prompt 19 (side-wall camera overhang):
+
+> - **Tool:** Copilot · AI assistant using Copilot SDK in VS Code · 2026-11-03
+> - **Session:** continued
+> - **Verified:** agent-tested
+> - **Human edits:** change wall-overhang to 120px
+
+The side wall ends are still visible when the camera is tilted. Extend them slightly farther toward the camera, then summarize the room geometry changes here.
+
+## Output 19:
+
+Increased the shared `--wall-overhang` in [clock.html](clock.html) from `40px` to `60px`, extending both side walls farther toward the camera while preserving their back-wall alignment. The floor and ceiling now use `left: 0` and `width: 100%`, so they span the responsive room width and meet both side walls consistently. The floor and ceiling retain their `1100px` depth, which exceeds the `620px` room depth and hides their far ends.
