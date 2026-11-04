@@ -82,6 +82,7 @@
   .legend-swatch { width: 24px; height: 14px; border: 1px solid var(--border); background: repeating-linear-gradient(135deg, transparent 0 7px, #85857f 7px 11px); opacity: .7; }
   .empty { color: var(--muted); }
   footer { margin-top: 24px; color: var(--muted); font-size: .8rem; }
+  footer .attribution { margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -104,7 +105,10 @@
   </header>
 
   <div id="list"></div>
-  <footer id="count"></footer>
+  <footer>
+    <div id="count"></div>
+    <div class="attribution">Project structure adapted from Paul Kaefer's <a href="https://github.com/paulkaefer/vibe-coding">vibe-coding</a> collection.</div>
+  </footer>
 </main>
 
 <script>
@@ -112,9 +116,9 @@
    Copy one line, paste it below, edit the fields.
    title, href, desc are required. thumb is optional (any image path/URL).  */
 const PROJECTS = [
+  { title: "Wall Clock",              href: "clock/clock.html",                         desc: "Check the time.",                                                     status: "keeper",    thumb: "_thumbs/clock.svg" },
+  { title: "CORS Practice",           href: "cors_practice/cors-practice.html",         desc: "Learn Cross-Origin Resource Sharing through interactive scenarios.",  status: "keeper",    thumb: "_thumbs/cors-practice.svg" },
   { title: "Not To Do List",          href: "not_to_do_list/not-to-do-list.html",       desc: "Keep track of tasks that should remain unfinished.",                  status: "prototype", thumb: "_thumbs/not-to-do-list.svg" },
-  { title: "Wall Clock",              href: "clock/clock.html",                         desc: "Check the time.",                       status: "keeper", thumb: "_thumbs/clock.svg" },
-  { title: "CORS Practice",          href: "cors_practice/cors-practice.html",          desc: "Learn Cross-Origin Resource Sharing through interactive scenarios.", status: "keeper",    thumb: "_thumbs/cors-practice.svg" },
 ];
 
 /* ---------- render ---------- */
