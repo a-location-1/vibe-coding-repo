@@ -4,12 +4,12 @@
 > - **Dates:** 2026-11-03 → 2026-11-03
 > - **Defaults:** Copilot · AI assistant using Copilot SDK in VS Code
 > - **Status:** keeper
-> - **Use:** none yet
-> - **Reusability:** artifact: TBD · prompt pattern: TBD
+> - **Use:** none
+> - **Reusability:** artifact: low · prompt pattern: high
 > - **Tags:** single-file-html, game, localStorage
-> - **Takeaway:** TBD
-> - **Story value:** TBD
-> - **Surprises:** TBD
+> - **Takeaway:** specificity in logic produces good results; in general, assuming will only work when providing extremely general direction that can be filled in with "conventional" details.
+> - **Story value:** anecdote
+> - **Surprises:** the agent was able to execute on the visual prompt well, I suspect because the proper noun gave the agent a large amount of training data to inform its decisions.
 
 # Prompt 1 (house plant prototype):
 
